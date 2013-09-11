@@ -12,20 +12,9 @@ Tested on PHP 5.2.x
 Usage
 -----
 
-```php
-/* This piece of code is probably good candidate for being factored in a Factory
- * to hide the complexity of creating an instance
- * It's here just for demo
- * */
-require 'path/to/rackspace/cdn/cloudfiles.php';
-$RackspaceAuth = new CF_Authentication('username', 'apikey');
-$RackspaceAuth->authenticate();
-$RackspaceConnection = new CF_Connection($RackspaceAuth);
-$CDN = new Gateways_Rackspace($RackspaceConnection);
-$CDN->setConfig( array( /* ..configuration.. */ );
-$CDN->container = 'name-of-container';
+Assuming `$CDN` is the instance object that was factored somewhere:
 
-/* This is how you'd interact with the CDN via factored $CDN object */
+```php
 try {
   // Create/Update blob
   $CDN->blob('lorem.js')->set('contents', "console.log('hello world!')")->save();
@@ -39,12 +28,6 @@ try {
   } else {
     echo 'Blob does not exist';
   }
-
-  // Delete container
-  $CDN->delete('yes I confirm deletion of current container');
-
-  // Truncate container
-  foreach( $CDN->blobs as $blob ) $blob->delete();
 
   // List all blobs
   $blobs = $CDN->blobs();
@@ -65,7 +48,28 @@ try {
   // Just container info, not really useful imho but it's there
   print_r( $CDN->info() );
 
+  // Truncate container
+  foreach( $CDN->blobs as $blob ) $blob->delete();
+
 } catch( Exception $e ) {
   echo 'Following error occured: ' . $e->getMessage();
 }
+```
+
+Instantiation
+-------------
+
+Note that this piece of code is probably a good candidate for being factored
+in a Factory to hide the complexity of creating an instance.
+[Read more](http://en.wikipedia.org/wiki/Factory_method_pattern) on
+factory design pattern if not sure about it.
+
+```php
+require 'path/to/rackspace/cdn/cloudfiles.php';
+$RackspaceAuth = new CF_Authentication('username', 'apikey');
+$RackspaceAuth->authenticate();
+$RackspaceConnection = new CF_Connection($RackspaceAuth);
+$CDN = new Gateways_Rackspace($RackspaceConnection);
+$CDN->setConfig( array( /* ..configuration.. */ );
+$CDN->container = 'name-of-container';
 ```
